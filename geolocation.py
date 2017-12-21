@@ -1,35 +1,51 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from sqlalchemy import create_engine
-from json import dumps
 from flask import jsonify
 import requests
 import os
-# from flask import status
-# from flask.ext.api import status
 
 app = Flask(__name__)
 api = Api(app)
 
 class GeoLocation(Resource):
     # TODO change request type to POST Instead
+    # TODO instruct that they put in spaces for address
     def get_google_service(self, address):
         base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
-        api_key = os.environ.get('google_api_key')
+        google_api_key = os.environ.get('google_api_key')
         params = dict(
             address=address,
-            key=api_key
+            key=google_api_key
         )
-        if api_key:
+        if google_api_key:
             # url = base_url + 'address=' + address + '&key=' + api_key
             result = requests.get(base_url,params=params)
             return result
         else:
             raise ValueError('No API key for google api')
 
-    def parse_for_lat_lng(self, result):
+    def parse_google_service_lat_lng(self, result):
         return (result['results'][0]['geometry']['location']['lat'],
                 result['results'][0]['geometry']['location']['lng'])
+
+    def get_geocoder_service(self,address):
+        url = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
+        geocoder_app_id =  os.environ.get('geocoder_app_id')
+        geocoder_app_code = os.environ.get('geocoder_app_code')
+        params = dict(
+            searchtext=address,
+            app_id=geocoder_app_id,
+            app_code=geocoder_app_code
+        )
+        if geocoder_app_code is not None and geocoder_app_id is not None:
+            result = requests.get(url, params=params)
+            return result
+        else:
+            raise ValueError('No app id or app code key for geocoder')
+
+    def parse_geocoder_service_lat_lng(self, result):
+        return (result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Latitude']
+,               result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Longitude'])
 
     def get(self):
         address = request.args.get('address')
@@ -37,13 +53,14 @@ class GeoLocation(Resource):
             google_service_result = self.get_google_service(address)
             print google_service_result
             if google_service_result.status_code == 200:
-                lat,lng = self.parse_for_lat_lng(google_service_result.json())
+                lat,lng = self.parse_google_service_lat_lng(google_service_result.json())
                 result = {'data':[{'latitude': lat, 'longitude':lng}]}
                 return jsonify(result)
             else:
-                print 'Other serivce'
-                # use another service
-            # return jsonify(result)
+                geocoder_service_result = self.get_geocoder_service(address)
+                lat,lng = self.parse_geocoder_service_lat_lng(geocoder_service_result.json())
+                result = {'data': [{'latitude': lat, 'longitude': lng}]}
+                return jsonify(result)
         else:
             result = {'status': 'false', 'message': 'No lat and long given'}
             return result,400
