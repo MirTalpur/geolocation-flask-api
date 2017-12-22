@@ -4,18 +4,22 @@ from flask import jsonify
 import requests
 import os
 
+
 class GeoLocation(Resource):
-    # TODO change request type to POST Instead
     # TODO instruct that they put in spaces for address
+    google_base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
+    geocoder_base_url = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
+    google_api_key = os.environ.get('google_api_key')
+    geocoder_app_id = os.environ.get('geocoder_app_id')
+    geocoder_app_code = os.environ.get('geocoder_app_code')
+
     def get_google_service(self, address):
-        base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
-        google_api_key = os.environ.get('google_api_key')
         params = dict(
             address=address,
-            key=google_api_key
+            key=self.google_api_key
         )
-        if google_api_key:
-            result = requests.get(base_url,params=params)
+        if self.google_api_key:
+            result = requests.get(self.google_base_url, params=params)
             return result
         else:
             raise ValueError('No API key for google api')
@@ -24,24 +28,21 @@ class GeoLocation(Resource):
         return (result['results'][0]['geometry']['location']['lat'],
                 result['results'][0]['geometry']['location']['lng'])
 
-    def get_geocoder_service(self,address):
-        url = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
-        geocoder_app_id =  os.environ.get('geocoder_app_id')
-        geocoder_app_code = os.environ.get('geocoder_app_code')
+    def get_geocoder_service(self, address):
         params = dict(
             searchtext=address,
-            app_id=geocoder_app_id,
-            app_code=geocoder_app_code
+            app_id=self.geocoder_app_id,
+            app_code=self.geocoder_app_code
         )
-        if geocoder_app_code is not None and geocoder_app_id is not None:
-            result = requests.get(url, params=params)
+        if self.geocoder_app_code is not None and self.geocoder_app_id is not None:
+            result = requests.get(self.geocoder_base_url, params=params)
             return result
         else:
             raise ValueError('No app id or app code key for geocoder')
 
     def parse_geocoder_service_lat_lng(self, result):
-        return (result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Latitude']
-,               result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Longitude'])
+        return (result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Latitude'],
+                result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Longitude'])
 
     def call_services(self, address):
         google_service_result = self.get_google_service(address)
@@ -61,7 +62,7 @@ class GeoLocation(Resource):
             return self.call_services(address)
         else:
             result = {'status': 'false', 'message': 'No lat and long given'}
-            return result,400
+            return result, 400
 
     def post(self):
         address = request.form.get('address')
@@ -70,6 +71,7 @@ class GeoLocation(Resource):
         else:
             result = {'status': 'false', 'message': 'No lat and long given'}
             return result, 400
+
 
 app = Flask(__name__)
 api = Api(app)
