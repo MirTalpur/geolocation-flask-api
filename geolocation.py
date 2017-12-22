@@ -4,9 +4,6 @@ from flask import jsonify
 import requests
 import os
 
-app = Flask(__name__)
-api = Api(app)
-
 class GeoLocation(Resource):
     # TODO change request type to POST Instead
     # TODO instruct that they put in spaces for address
@@ -18,7 +15,6 @@ class GeoLocation(Resource):
             key=google_api_key
         )
         if google_api_key:
-            # url = base_url + 'address=' + address + '&key=' + api_key
             result = requests.get(base_url,params=params)
             return result
         else:
@@ -47,26 +43,36 @@ class GeoLocation(Resource):
         return (result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Latitude']
 ,               result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Longitude'])
 
+    def call_services(self, address):
+        google_service_result = self.get_google_service(address)
+        if google_service_result.status_code == 200:
+            lat, lng = self.parse_google_service_lat_lng(google_service_result.json())
+            result = {'data': [{'latitude': lat, 'longitude': lng}]}
+            return jsonify(result)
+        else:
+            geocoder_service_result = self.get_geocoder_service(address)
+            lat, lng = self.parse_geocoder_service_lat_lng(geocoder_service_result.json())
+            result = {'data': [{'latitude': lat, 'longitude': lng}]}
+            return jsonify(result)
+
     def get(self):
         address = request.args.get('address')
         if address:
-            google_service_result = self.get_google_service(address)
-            print google_service_result
-            if google_service_result.status_code == 200:
-                lat,lng = self.parse_google_service_lat_lng(google_service_result.json())
-                result = {'data':[{'latitude': lat, 'longitude':lng}]}
-                return jsonify(result)
-            else:
-                geocoder_service_result = self.get_geocoder_service(address)
-                lat,lng = self.parse_geocoder_service_lat_lng(geocoder_service_result.json())
-                result = {'data': [{'latitude': lat, 'longitude': lng}]}
-                return jsonify(result)
+            return self.call_services(address)
         else:
             result = {'status': 'false', 'message': 'No lat and long given'}
             return result,400
 
+    def post(self):
+        address = request.form.get('address')
+        if address:
+            return self.call_services(address)
+        else:
+            result = {'status': 'false', 'message': 'No lat and long given'}
+            return result, 400
 
-
+app = Flask(__name__)
+api = Api(app)
 api.add_resource(GeoLocation, '/v1/geolocation')
 
 if __name__ == '__main__':
