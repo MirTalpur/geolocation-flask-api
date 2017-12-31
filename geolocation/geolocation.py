@@ -1,6 +1,5 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
-from flask import jsonify
+from flask import request, jsonify
+from flask_restful import Resource
 import requests
 import os
 
@@ -71,11 +70,3 @@ class GeoLocation(Resource):
         else:
             result = {'status': 'false', 'message': 'No lat and long given'}
             return result, 400
-
-
-app = Flask(__name__)
-api = Api(app)
-api.add_resource(GeoLocation, '/v1/geolocation')
-
-if __name__ == '__main__':
-    app.run(port=3000)
