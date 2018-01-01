@@ -24,14 +24,14 @@ class TestGeoLocation(TestCase):
         self.assertAlmostEqual(lng, -122.084, delta=0.1)
 
     def test_get_geocoder_service(self):
-        geolocation = GeoLocation()
-        result = geolocation.get_geocoder_service(self.address)
+        geo_location = GeoLocation()
+        result = geo_location.get_geocoder_service(self.address)
         self.assertEqual(result.status_code, 200)
 
     def test_parse_geocoder_service_lat_lng(self):
-        geolocation = GeoLocation()
-        result = geolocation.get_geocoder_service(self.address)
-        lat, lng = geolocation.parse_geocoder_service_lat_lng(result.json())
+        geo_location = GeoLocation()
+        result = geo_location.get_geocoder_service(self.address)
+        lat, lng = geo_location.parse_geocoder_service_lat_lng(result.json())
         self.assertAlmostEqual(lat, 37.422, delta=0.1)
         self.assertAlmostEqual(lng, -122.084, delta=0.1)
 
@@ -50,6 +50,7 @@ class TestGeoLocation(TestCase):
         result = self.app.post('/v1/geolocation', data=post_data)
         assert 'latitude' in result.data
         assert 'longitude' in result.data
+
 
 if __name__ == '__main__':
     unittest.main()
