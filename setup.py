@@ -8,6 +8,5 @@ setup(
         'flask',
         'flask_restful',
         'requests',
-        'os',
     ],
 )
