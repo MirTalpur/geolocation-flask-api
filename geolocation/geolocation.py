@@ -24,8 +24,11 @@ class GeoLocation(Resource):
             raise ValueError('No API key for google api')
 
     def parse_google_service_lat_lng(self, result):
-        return (result['results'][0]['geometry']['location']['lat'],
-                result['results'][0]['geometry']['location']['lng'])
+        try:
+            return (result['results'][0]['geometry']['location']['lat'],
+                    result['results'][0]['geometry']['location']['lng'])
+        except IndexError:
+            raise IndexError('Out of bounds for google service')
 
     def get_geocoder_service(self, address):
         params = dict(
@@ -40,18 +43,22 @@ class GeoLocation(Resource):
             raise ValueError('No app id or app code key for geocoder')
 
     def parse_geocoder_service_lat_lng(self, result):
-        return (result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Latitude'],
-                result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Longitude'])
+        try:
+            return (result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Latitude'],
+                    result['Response']['View'][0]['Result'][0]['Location']['DisplayPosition']['Longitude'])
+        except IndexError:
+            raise IndexError('Out of bounds for geocoder service')
 
     def call_services(self, address):
-        google_service_result = self.get_google_service(address)
-        if google_service_result.status_code == 200:
-            lat, lng = self.parse_google_service_lat_lng(google_service_result.json())
+        geocoder_service_result = self.get_geocoder_service(address)
+        if geocoder_service_result.status_code == 200:
+            geocoder_service_result = self.get_geocoder_service(address)
+            lat, lng = self.parse_geocoder_service_lat_lng(geocoder_service_result.json())
             result = {'data': [{'latitude': lat, 'longitude': lng}]}
             return jsonify(result)
         else:
-            geocoder_service_result = self.get_geocoder_service(address)
-            lat, lng = self.parse_geocoder_service_lat_lng(geocoder_service_result.json())
+            google_service_result = self.get_google_service(address)
+            lat, lng = self.parse_google_service_lat_lng(google_service_result.json())
             result = {'data': [{'latitude': lat, 'longitude': lng}]}
             return jsonify(result)
 
