@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/MirTalpur/geolocation-flask-api.svg?branch=master)](https://travis-ci.org/MirTalpur/geolocation-flask-api)
-# geolocation-flask-api
+# Geolocation API
 Leverages Google Geo location and Geo coder API to create RESTFUL endpoints for latitude and longitude data given a physical address
 
 # Pre-reqs
@@ -78,9 +78,6 @@ curl --data "address=1600 Amphitheatre Parkway,Mountain+View,CA" v1/geolocation
 The tests require the package of geolocation be available for use. Use setup.py to achieve this
 ```
 pip install --editable .
-export FLASK_APP=geolocation
-export FLASK_DEBUG=true
-flask run
 ```
 And than we can run the tests
 ```
