@@ -12,11 +12,12 @@ Although pip isn't necessary it is highly recommended for local development
 ### Docker
 Docker allows for containerized applications.
 
-#Local Development
+# Local Development
 Local development can be done using ```requirments.txt```
-# Setup
+### Setup
+
 #### Create a virtualenv
-```virtualenv <projec_name>```
+```virtualenv <project_name>```
 
 #### Start using the virtualenv
 ```source <project_name>/bin/activate```
