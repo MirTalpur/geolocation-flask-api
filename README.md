@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/MirTalpur/geolocation-flask-api.svg?branch=master)](https://travis-ci.org/MirTalpur/geolocation-flask-api)
 # geolocation-flask-api
 Leverages Google Geo location and Geo coder API to create RESTFUL endpoints for latitude and longitude data given a physical address
 
