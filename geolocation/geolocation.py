@@ -5,7 +5,6 @@ import os
 
 
 class GeoLocation(Resource):
-    # TODO instruct that they put in spaces for address
     GOOGLE_BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json?'
     GEOCODER_BASE_URL = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
     GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
