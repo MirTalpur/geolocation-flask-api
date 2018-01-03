@@ -8,9 +8,9 @@ class GeoLocation(Resource):
     # TODO instruct that they put in spaces for address
     google_base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
     geocoder_base_url = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
-    google_api_key = os.environ.get('google_api_key')
-    geocoder_app_id = os.environ.get('geocoder_app_id')
-    geocoder_app_code = os.environ.get('geocoder_app_code')
+    google_api_key = os.environ.get('GOOGLE_API_KEY')
+    geocoder_app_id = os.environ.get('GEOCODER_APP_ID')
+    geocoder_app_code = os.environ.get('GEOCODER_APP_CODE')
 
     def get_google_service(self, address):
         params = dict(
