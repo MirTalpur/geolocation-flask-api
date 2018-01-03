@@ -6,19 +6,19 @@ import os
 
 class GeoLocation(Resource):
     # TODO instruct that they put in spaces for address
-    google_base_url = 'https://maps.googleapis.com/maps/api/geocode/json?'
-    geocoder_base_url = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
-    google_api_key = os.environ.get('GOOGLE_API_KEY')
-    geocoder_app_id = os.environ.get('GEOCODER_APP_ID')
-    geocoder_app_code = os.environ.get('GEOCODER_APP_CODE')
+    GOOGLE_BASE_URL = 'https://maps.googleapis.com/maps/api/geocode/json?'
+    GEOCODER_BASE_URL = 'https://geocoder.cit.api.here.com/6.2/geocode.json?'
+    GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+    GEOCODER_APP_ID = os.environ.get('GEOCODER_APP_ID')
+    GEOCODER_APP_CODE = os.environ.get('GEOCODER_APP_CODE')
 
     def get_google_service(self, address):
         params = dict(
             address=address,
-            key=self.google_api_key
+            key=self.GOOGLE_API_KEY
         )
-        if self.google_api_key:
-            result = requests.get(self.google_base_url, params=params)
+        if self.GOOGLE_API_KEY:
+            result = requests.get(self.GOOGLE_BASE_URL, params=params)
             return result
         else:
             raise ValueError('No API key for google api')
@@ -33,11 +33,11 @@ class GeoLocation(Resource):
     def get_geocoder_service(self, address):
         params = dict(
             searchtext=address,
-            app_id=self.geocoder_app_id,
-            app_code=self.geocoder_app_code
+            app_id=self.GEOCODER_APP_ID,
+            app_code=self.GEOCODER_APP_CODE
         )
-        if self.geocoder_app_code is not None and self.geocoder_app_id is not None:
-            result = requests.get(self.geocoder_base_url, params=params)
+        if self.GEOCODER_APP_CODE is not None and self.GEOCODER_APP_ID is not None:
+            result = requests.get(self.GEOCODER_BASE_URL, params=params)
             return result
         else:
             raise ValueError('No app id or app code key for geocoder')
